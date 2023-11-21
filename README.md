@@ -37,6 +37,10 @@ pip install -r requirements.txt
 python main.py
 ```
 
+## ⌨️ Control
+
+Для управления в меню используются стрелочки Вверх/Вниз, для выбора действия Пробел и Enter для подтверждение выбора.
+
 ## ⚙️ Config
 
 | Name | Description |
