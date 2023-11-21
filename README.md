@@ -1,5 +1,5 @@
 # StarLabs - Discord 
-![]([https://ibb.co/wpMZY3N](https://i.ibb.co/RQzG7Zp/8e4fafbd-9319-4653-9f5a-fdf0f84974e7.png))
+
 
 ## Config
 
