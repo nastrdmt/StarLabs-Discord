@@ -14,6 +14,16 @@
 
 - сменить имя аккаунта, юзернейм, пароли, картинку профиля
 
+## 🔗 Links
+
+🔔 PUBLIC: https://t.me/StarLabsTech
+
+💬 CHAT: https://t.me/StarLabsChat
+
+💰 DONATION EVM ADDRESS: 0x620ea8b01607efdf3c74994391f86523acf6f9e1
+
+📖 FULL TUTORIAL: https://teletype.in/@izanumi/star_labs_discord
+
 ## 🚀 Installation
 ```
 git clone https://github.com/0xStarLabs/StarLabs-Discord.git
@@ -53,12 +63,3 @@ python main.py
 | passwords.txt | Содержит текущие пароли аккаунтов |
 | proxies.txt | Содержит прокси в формате user:pass@ip:port |
 | profile_pictures | Папка содержит картинки для смены в профилях |
-
-
-## 🔗 Links
-
-🔔 PUBLIC: https://t.me/StarLabsTech
-
-💬 CHAT: https://t.me/StarLabsChat
-
-💰 DONATION EVM ADDRESS: 0x620ea8b01607efdf3c74994391f86523acf6f9e1
