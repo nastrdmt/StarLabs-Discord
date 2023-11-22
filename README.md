@@ -34,6 +34,7 @@
 ## 🚀 Installation
 ```
 # для работы необходимо установить NodeJS!
+# https://nodejs.org/en/download/current
 
 git clone https://github.com/0xStarLabs/StarLabs-Discord.git
 
@@ -102,6 +103,7 @@ python main.py
 ## 🚀 Installation
 ```
 # You need to install NodeJS!
+# https://nodejs.org/en/download/current
 
 git clone https://github.com/0xStarLabs/StarLabs-Discord.git
 
