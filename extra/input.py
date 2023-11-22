@@ -1,5 +1,5 @@
-import inquirer
 from loguru import logger
+import inquirer
 
 import extra
 
@@ -27,7 +27,7 @@ def ask_for_task_data(all_tasks: list) -> dict | None:
         "send message channel": {}
     }
 
-    if "Inviter" in all_tasks:
+    if "Inviter [Token]" in all_tasks:
         invite_link = input("Paste your invite code or link: ").strip()
         if "/" in invite_link:
             invite_code = invite_link.split('/')[-1]
@@ -41,44 +41,48 @@ def ask_for_task_data(all_tasks: list) -> dict | None:
             return
         tasks_user_data['inviter']['captcha_bot'] = captcha_choice[0].strip()
         if tasks_user_data['inviter']['captcha_bot'] in ("Pandez", "CaptchaBot", "Sledgehammer"):
-            tasks_user_data['inviter']['guild_id'] = input("Paste the guild ID: ").strip()
-            tasks_user_data['inviter']['channel_id'] = input("Paste the channel ID: ").strip()
-            tasks_user_data['inviter']['message_id'] = input("Paste the message ID: ").strip()
+            message_link = input("Paste the link to the message: ").strip()
+            tasks_user_data['inviter']['guild_id'] = message_link.split("/")[-3]
+            tasks_user_data['inviter']['channel_id'] = message_link.split("/")[-2]
+            tasks_user_data['inviter']['message_id'] = message_link.split("/")[-1]
 
-    if "Press Button" in all_tasks:
+    if "Press Button [Token]" in all_tasks:
         visible_discord_token = input("Paste the discord token that can see the message: ").strip()
-        tasks_user_data['press button']['guild_id'] = input("Paste the guild ID: ").strip()
-        tasks_user_data['press button']['channel_id'] = input("Paste the channel ID: ").strip()
-        tasks_user_data['press button']['message_id'] = input("Paste the message ID: ").strip()
+        message_link = input("Paste the link to the message: ").strip()
+        tasks_user_data['press button']['guild_id'] = message_link.split("/")[-3]
+        tasks_user_data['press button']['channel_id'] = message_link.split("/")[-2]
+        tasks_user_data['press button']['message_id'] = message_link.split("/")[-1]
 
         button_data, application_id, ok = extra.message_click_button_info(tasks_user_data['press button']['channel_id'], tasks_user_data['press button']['message_id'], visible_discord_token)
         tasks_user_data['press button']['button_data'] = button_data
         tasks_user_data['press button']['application_id'] = application_id
 
-    if "Press Reaction" in all_tasks:
+    if "Press Reaction [Token]" in all_tasks:
         visible_discord_token = input("Paste the discord token that can see the message: ").strip()
-        tasks_user_data['press reaction']['channel_id'] = input("Paste the channel ID: ").strip()
-        tasks_user_data['press reaction']['message_id'] = input("Paste the message ID: ").strip()
+        message_link = input("Paste the link to the message: ").strip()
+        tasks_user_data['press reaction']['channel_id'] = message_link.split("/")[-2]
+        tasks_user_data['press reaction']['message_id'] = message_link.split("/")[-1]
 
         tasks_user_data['press reaction']['emojis_info'], ok = extra.message_reactions_emojis_info(tasks_user_data['press reaction']['channel_id'], tasks_user_data['press reaction']['message_id'], visible_discord_token)
         if not ok:
             return
 
-    if "Change Name" in all_tasks:
+    if "Change Name [Token]" in all_tasks:
         tasks_user_data['change name'] = True
 
-    if "Change Username" in all_tasks:
+    if "Change Username [Token + Password]" in all_tasks:
         tasks_user_data['change username'] = True
 
-    if "Change Password" in all_tasks:
+    if "Change Password [Token + Password]" in all_tasks:
         tasks_user_data['change password'] = True
 
-    if "Change Profile Picture" in all_tasks:
+    if "Change Profile Picture [Token + Password]" in all_tasks:
         tasks_user_data['change profile picture'] = True
 
-    if "Send message to the channel" in all_tasks:
-        tasks_user_data['send message channel']['guild_id'] = input("Paste the guild ID: ").strip()
-        tasks_user_data['send message channel']['channel_id'] = input("Paste the channel ID: ").strip()
+    if "Send message to the channel [Token]" in all_tasks:
+        message_link = input("Paste the link to the channel: ").strip()
+        tasks_user_data['send message channel']['guild_id'] = message_link.split("/")[-2]
+        tasks_user_data['send message channel']['channel_id'] = message_link.split("/")[-1]
         tasks_user_data['send message channel']['message_content'] = input("Paste the message you want to send: ").strip()
 
     return tasks_user_data

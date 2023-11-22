@@ -1,5 +1,3 @@
-from time import sleep
-
 from loguru import logger
 
 from . import DiscordTower
@@ -93,7 +91,7 @@ class Inviter(DiscordTower):
                         logger.success(f"{self.account_index} | Joined the server!")
                         return True
                     else:
-                        logger.info(f"{self.account_index} | Wrong invite response, one more try | {retry + 1}/{self.config['max_tasks_retries']}")
+                        logger.info(f"{self.account_index} | Wrong invite response | {retry + 1}/{self.config['max_invite_retries']}")
                         continue
 
                 elif resp.status_code == 200 and resp.json()["type"] == 0:
@@ -113,7 +111,7 @@ class Inviter(DiscordTower):
 
             except Exception as err:
                 logger.error(f"{self.account_index} | Error joining the server: {err}")
-                if retry + 1 == self.config['max_tasks_retries']:
+                if retry + 1 == self.config['max_invite_retries']:
                     return False
 
     def agree_with_rules(self) -> bool:

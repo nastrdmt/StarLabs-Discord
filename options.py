@@ -1,21 +1,17 @@
-import base64
-import os
-import queue
-import threading
 from concurrent.futures import ThreadPoolExecutor
-from itertools import repeat
 from random import randint
-from time import sleep
-
 from loguru import logger
+from time import sleep
+import threading
+import queue
+import os
 
 import star_labs_discord
 import extra
-import inquirer
 
 
 def options():
-    all_tasks = extra.get_user_choice(extra.MENU_ITEMS, "main_tasks", "Choose one or few tasks")
+    all_tasks = extra.get_user_choice(extra.MENU_ITEMS, "main_tasks", "Choose one or a few tasks")
     tasks_data = extra.ask_for_task_data(all_tasks)
     if tasks_data is None:
         return

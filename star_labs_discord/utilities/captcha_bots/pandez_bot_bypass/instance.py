@@ -1,14 +1,13 @@
-import base64
-from functools import partial
-from time import sleep
-
-import discum
-from curl_cffi import requests
 from discum.utils.button import Buttoner
-from loguru import logger
 import requests as default_requests
-from PIL import Image
+from curl_cffi import requests
+from functools import partial
+from loguru import logger
+from time import sleep
 from io import BytesIO
+from PIL import Image
+import base64
+import discum
 
 from ... import calculate_nonce
 

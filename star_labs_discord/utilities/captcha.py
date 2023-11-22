@@ -1,10 +1,9 @@
 # quick api for the https://capmonster.cloud/ captcha service #
-from typing import Any
-
+import requests as default_requests
 from curl_cffi import requests
 from loguru import logger
 from time import sleep
-import requests as default_requests
+from typing import Any
 
 
 class Capmonstercloud:
@@ -103,15 +102,16 @@ class Capmonstercloud:
                         return g_recaptcha_response, True
 
                 else:
-                    logger.error(f"{self.account_index} | Failed to get captcha solution: {resp.json()['errorDescription']}")
+                    pass
 
             except Exception as err:
                 logger.error(f"{self.account_index} | Failed to get captcha solution: {err}")
-                return "", "", False
+                return "", False
             # sleep between result requests
             sleep(6)
 
-        return "", "", False
+        logger.error(f"{self.account_index} | Failed to get captcha solution")
+        return "", False
 
 
 class TwoCaptcha:
@@ -148,7 +148,7 @@ class TwoCaptcha:
             logger.error(f"{self.account_index} | Failed to send captcha request to 2captcha: {err}")
             return "", False
 
-    def get_captcha_result(self, task_id: str) -> tuple[Any, bool] | tuple[str, str, bool]:
+    def get_captcha_result(self, task_id: str) -> tuple[Any, bool] | tuple[str, bool]:
         for i in range(30):
             try:
                 resp = default_requests.post("http://2captcha.com/res.php",
@@ -165,16 +165,11 @@ class TwoCaptcha:
                     response = resp.json()['request']
                     return response, True
 
-                elif "CAPCHA_NOT_READY" in resp.text:
-                    pass
-
-                else:
-                    raise Exception(resp.text)
-
             except Exception as err:
                 logger.error(f"{self.account_index} | Failed to get captcha solution: {err}")
-                return "", "", False
+                return "", False
             # sleep between result requests
             sleep(5)
 
-        return "", "", False
+        logger.error(f"{self.account_index} | Failed to get captcha solution")
+        return "", False

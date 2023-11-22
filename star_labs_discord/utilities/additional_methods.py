@@ -1,8 +1,7 @@
-import string
-from random import choice
-
 from curl_cffi import requests
 from loguru import logger
+from random import choice
+import string
 import time
 
 

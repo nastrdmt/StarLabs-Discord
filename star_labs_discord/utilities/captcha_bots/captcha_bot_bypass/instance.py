@@ -1,10 +1,9 @@
-from functools import partial
-from time import sleep
-
-import discum
-from curl_cffi import requests
 from discum.utils.button import Buttoner
+from functools import partial
+from curl_cffi import requests
 from loguru import logger
+from time import sleep
+import discum
 
 
 class CaptchaBot:

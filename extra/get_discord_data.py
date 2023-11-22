@@ -1,7 +1,8 @@
-import inquirer
+from urllib.parse import quote
 from loguru import logger
 import requests
-from urllib.parse import quote
+import inquirer
+
 
 # returns dict with message data (label, custom_id) and application_id
 def message_click_button_info(channel_id: str, message_id: str, visible_discord_token: str) -> tuple[dict, str, bool]:

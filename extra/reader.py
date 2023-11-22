@@ -1,7 +1,6 @@
+from loguru import logger
 import base64
 import os
-
-from loguru import logger
 
 
 def read_txt_file(file_name: str, file_path: str) -> list:

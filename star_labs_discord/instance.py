@@ -1,10 +1,8 @@
-from functools import partial
-from time import sleep
-
-import discum
 from curl_cffi import requests
-
+from functools import partial
 from loguru import logger
+from time import sleep
+import discum
 
 from . import utilities
 

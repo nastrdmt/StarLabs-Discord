@@ -1,6 +1,6 @@
 from loguru import logger
-import sys
 import urllib3
+import sys
 
 import options
 import extra
@@ -11,6 +11,8 @@ def main():
 
     while True:
         extra.show_logo()
+        extra.show_dev_info()
+
         options.options()
 
 

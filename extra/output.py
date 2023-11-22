@@ -1,8 +1,8 @@
-import os
-import sys
-from colorama import init
-from pyfiglet import figlet_format
 from termcolor import cprint
+from pyfiglet import figlet_format
+from colorama import init
+import sys
+import os
 
 
 def show_logo():
@@ -14,15 +14,23 @@ def show_logo():
     print("")
 
 
+def show_dev_info():
+    print("\033[36m" + "VERSION: " + "\033[34m" + "1.0" + "\033[34m")
+    print("\033[36m"+"DEV: " + "\033[34m" + "https://t.me/StarLabsTech" + "\033[34m")
+    print("\033[36m"+"GitHub: " + "\033[34m" + "https://github.com/0xStarLabs/StarLabs-Discord" + "\033[34m")
+    print("\033[36m" + "DONATION EVM ADDRESS: " + "\033[34m" + "0x620ea8b01607efdf3c74994391f86523acf6f9e1" + "\033[0m")
+    print()
+
+
 MENU_ITEMS = [
-    "Inviter",
-    "Press Button",
-    "Press Reaction",
-    "Change Name",
-    "Change Username",
-    "Change Password",
-    "Change Profile Picture",
-    "Send message to the channel",
+    "Inviter [Token]",
+    "Press Button [Token]",
+    "Press Reaction [Token]",
+    "Change Name [Token]",
+    "Change Username [Token + Password]",
+    "Change Password [Token + Password]",
+    "Change Profile Picture [Token + Password]",
+    "Send message to the channel [Token]",
 ]
 
 CAPTCHA_BOTS = [
