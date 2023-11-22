@@ -81,7 +81,7 @@ python main.py
 
 ## ENGLISH VERSION:
 
-## 🤖 | Functional:
+## 🤖 | Features :
 
 🟢 Login to the server
 
