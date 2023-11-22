@@ -1,4 +1,5 @@
-# 🤩 StarLabs - Discord 
+#  StarLabs - Discord 
+
 
 ![Logo](https://i.postimg.cc/rpLrDXrr/8e4fafbd-9319-4653-9f5a-fdf0f84974e7.png)
 
