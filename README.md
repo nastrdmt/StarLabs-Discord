@@ -6,7 +6,7 @@
 
 ## 🔗 Links
 
-🔔 PUBLIC: https://t.me/StarLabsTech
+🔔 CHANNEL: https://t.me/StarLabsTech
 
 💬 CHAT: https://t.me/StarLabsChat
 
