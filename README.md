@@ -2,6 +2,18 @@
 
 ![Logo](https://i.postimg.cc/rpLrDXrr/8e4fafbd-9319-4653-9f5a-fdf0f84974e7.png)
 
+
+## 🔗 Links
+
+🔔 PUBLIC: https://t.me/StarLabsTech
+
+💬 CHAT: https://t.me/StarLabsChat
+
+💰 DONATION EVM ADDRESS: 0x620ea8b01607efdf3c74994391f86523acf6f9e1
+
+📖 FULL TUTORIAL: https://teletype.in/@izanumi/star_labs_discord
+
+
 ## 🤖 | Функционал:
 
 🟢 Вход на сервер 
@@ -16,16 +28,6 @@
 
 🟢 Поддержка ретраев, прокси, пауз, потоков
 
-
-## 🔗 Links
-
-🔔 PUBLIC: https://t.me/StarLabsTech
-
-💬 CHAT: https://t.me/StarLabsChat
-
-💰 DONATION EVM ADDRESS: 0x620ea8b01607efdf3c74994391f86523acf6f9e1
-
-📖 FULL TUTORIAL: https://teletype.in/@izanumi/star_labs_discord
 
 ## 🚀 Installation
 ```
