@@ -78,3 +78,72 @@ python main.py
 Автоматизация учетных записей пользователей Discord, также известных как самостоятельные боты, является нарушением Условий обслуживания и правил сообщества Discord и приведет к закрытию вашей учетной записи (аккаунтов). Рекомендуется осмотрительность. Я не буду нести ответственность за ваши действия. Прочтите об Условиях обслуживания Discord и Правилах сообщества.
 
 Это программное обеспечение было написано как доказательство концепции того, что учетные записи Discord могут быть автоматизированы и могут выполнять действия, выходящие за рамки обычных пользователей Discord, чтобы Discord мог вносить изменения. Авторы  освобождаются от любой ответственности, которую может повлечь за собой ваше использование.
+
+## ENGLISH VERSION:
+
+## 🤖 | Functional:
+
+🟢 Login to the server
+
+🟢 Pressing buttons and reactions
+
+🟢 Walkthroughs of protection bots (Pandez, Sledgehammer, Captcha Bot...)
+
+🟢 Sending messages to chat
+
+🟢 Change names, usernames, avatars
+
+🟢 Support for retrays, proxies, pauses, streams
+
+
+## 🚀 Installation
+```
+git clone https://github.com/0xStarLabs/StarLabs-Discord.git
+
+cd StarLabs-Discord
+
+pip install -r requirements.txt
+
+# Before starting the tool make sure to configure it in config.ini and add information to data folder
+
+python main.py
+```
+
+## ⌨️ Control
+
+To navigate the CLI menu use the Up/Down arrows, Space to select one or more actions and Enter to confirm your choice.
+
+## ⚙️ Config
+
+| Name | Description |
+| --- | --- |
+| max_invite_retries | Amount of retries while joining the server |
+| max_tasks_retries | Amount of retries while completing the task |
+| pause_between_tasks | Pause between the tasks |
+| capmonster_api_key | API key from https://capmonster.cloud/Dashboard |
+| 2captcha_api_key | API key from https://2captcha.com/ |
+
+
+
+## 🗂️ Data
+
+Данные в папке data:
+
+| Name | Description |
+| --- | --- |
+| discord_tokens.txt | DISCORD account tokens |
+| failed_tokens.txt | Failed tokens |
+| new_names.txt | Contains names for the name change function |
+| new_passwords.txt | Contains new passwords for the password change feature |
+| new_usernames.txt | Contains new usernames for the username change function |
+| passwords.txt | Contains current account passwords |
+| proxies.txt | Contains a proxy in the format user:pass@ip:port |
+| profile_pictures | The folder contains pictures to change in profiles |
+
+## Disclaimer
+
+The automation of User Discord accounts also known as self-bots is a violation of Discord Terms of Service & Community guidelines and will result in your account(s) being terminated. Discretion is adviced. I will not be responsible for your actions. Read about Discord Terms Of service and Community Guidelines
+
+Discord StarLabs was written as a proof of concept that Discord accounts can be automated and can perform actions beyond the scope of regular Discord Users like sending Embeds so that Discord can make changes. The Discord StarLabs authors are released of any liabilities which your usage may entail.
+
+
