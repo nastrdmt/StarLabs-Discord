@@ -2,7 +2,7 @@
 
 ![Logo](https://i.postimg.cc/rpLrDXrr/8e4fafbd-9319-4653-9f5a-fdf0f84974e7.png)
 
-## SEE ENGLISH VERSION BELOW 👇
+## [SEE ENGLISH VERSION BELOW ](https://github.com/0xStarLabs/StarLabs-Discord#english-version)👇
 
 ## 🔗 Links
 
