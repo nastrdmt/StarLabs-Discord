@@ -84,17 +84,17 @@ python main.py
 
 ## 🤖 | Features :
 
-🟢 Login to the server
+🟢 Invite joiner
 
 🟢 Pressing buttons and reactions
 
-🟢 Walkthroughs of protection bots (Pandez, Sledgehammer, Captcha Bot...)
+🟢 Bypass of protection bots (Pandez, Sledgehammer, Captcha Bot...)
 
 🟢 Sending messages to chat
 
 🟢 Change names, usernames, avatars
 
-🟢 Support for retrays, proxies, pauses, streams
+🟢 Retries, Proxies, Pauses, Threads
 
 
 ## 🚀 Installation
