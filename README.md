@@ -6,6 +6,7 @@
 ## [SEE ENGLISH VERSION BELOW ](https://github.com/0xStarLabs/StarLabs-Discord#english-version)👇
 
 ## 🔗 Links
+[![Telegram channel](https://img.shields.io/endpoint?url=https://runkit.io/damiankrawczyk/telegram-badge/branches/master?url=https://t.me/StarLabsTech)](https://t.me/StarLabsTech)
 
 🔔 CHANNEL: https://t.me/StarLabsTech
 
