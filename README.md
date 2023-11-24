@@ -32,6 +32,11 @@
 
 🟢 Поддержка ретраев, прокси, пауз, потоков
 
+🟢 Проверка токена на работоспособность
+
+🟢 Выход из сервера
+
+🟢 Получить все серверы в которые зашел токен
 
 ## 🚀 Installation
 ```
@@ -48,10 +53,6 @@ pip install -r requirements.txt
 
 python main.py
 ```
-
-## ⌨️ Control
-
-Для управления в меню используются стрелочки Вверх/Вниз, для выбора действия Пробел и Enter для подтверждение выбора.
 
 ## ⚙️ Config
 
@@ -79,6 +80,8 @@ python main.py
 | passwords.txt | Содержит текущие пароли аккаунтов |
 | proxies.txt | Содержит прокси в формате user:pass@ip:port |
 | profile_pictures | Папка содержит картинки для смены в профилях |
+| locked_tokens | Файл содержит токены, которые заблокированы или ограничены | 
+| messages_to_send | Файл содержит сообщения, которые будет отправлять бот в чат (случайно) |
 
 ## Дисклеймер
 Автоматизация учетных записей пользователей Discord, также известных как самостоятельные боты, является нарушением Условий обслуживания и правил сообщества Discord и приведет к закрытию вашей учетной записи (аккаунтов). Рекомендуется осмотрительность. Я не буду нести ответственность за ваши действия. Прочтите об Условиях обслуживания Discord и Правилах сообщества.
@@ -101,6 +104,11 @@ python main.py
 
 🟢 Retries, Proxies, Pauses, Threads
 
+🟢 Checking the token for operability
+
+🟢 Log out of the server
+
+🟢 Get all servers to which the token is logged in
 
 ## 🚀 Installation
 ```
@@ -117,10 +125,6 @@ pip install -r requirements.txt
 
 python main.py
 ```
-
-## ⌨️ Control
-
-To navigate the CLI menu use the Up/Down arrows, Space to select one or more actions and Enter to confirm your choice.
 
 ## ⚙️ Config
 
@@ -148,6 +152,8 @@ To navigate the CLI menu use the Up/Down arrows, Space to select one or more act
 | passwords.txt | Contains current account passwords |
 | proxies.txt | Contains a proxy in the format user:pass@ip:port |
 | profile_pictures | The folder contains pictures to change in profiles |
+| locked_tokens | File contains tokens that are locked or restricted | 
+| messages_to_send | File contains messages that the bot will send to chat (randomly) |
 
 ## Disclaimer
 
