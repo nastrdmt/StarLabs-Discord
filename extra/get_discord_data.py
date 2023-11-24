@@ -1,7 +1,8 @@
 from urllib.parse import quote
 from loguru import logger
 import requests
-import inquirer
+
+import extra
 
 
 # returns dict with message data (label, custom_id) and application_id
@@ -39,15 +40,8 @@ def choose_button_to_click(components: list) -> tuple[dict, bool]:
         for index, comp in enumerate(all_components, start=1):
             buttons.append(comp['label'])
 
-        print()
-        questions = [
-            inquirer.Checkbox("button",
-                              message="Choose the button",
-                              choices=buttons,
-                              ),
-        ]
-
-        button = inquirer.prompt(questions)["button"]
+        extra.show_menu(buttons)
+        button = extra.get_user_choice(buttons, "Choose the button")
 
         for index, comp in enumerate(all_components, start=1):
             if comp['label'] == button[0]:
@@ -66,18 +60,10 @@ def message_reactions_emojis_info(channel_id: str, message_id: str, visible_disc
                             })
 
         emojis = resp.json()[0]['reactions']
-
         emojis_list = [f"{emoji['emoji']['name']} | Count: {emoji['count']}" for emoji in emojis]
 
-        print()
-        questions = [
-            inquirer.Checkbox("emoji",
-                              message="Choose the emoji",
-                              choices=emojis_list,
-                              ),
-        ]
-
-        emojis = inquirer.prompt(questions)["emoji"]
+        extra.show_menu(emojis_list)
+        emojis = extra.get_user_choice(emojis_list, "Choose the emoji")
         emojis_names = [quote(emoji.split(" |")[0]) for emoji in emojis]
 
         return emojis_names, True

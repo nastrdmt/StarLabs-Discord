@@ -22,6 +22,19 @@ def show_dev_info():
     print()
 
 
+def show_menu(menu_items: list):
+    os.system("")
+    print()
+    counter = 0
+    for item in menu_items:
+        counter += 1
+
+        if counter == len(menu_items):
+            print('' + '[' + '\033[34m' + f'{counter}' + '\033[0m' + ']' + f' {item}\n')
+        else:
+            print('' + '[' + '\033[34m' + f'{counter}' + '\033[0m' + ']' + f' {item}')
+
+
 MENU_ITEMS = [
     "Inviter [Token]",
     "Press Button [Token]",
@@ -31,6 +44,9 @@ MENU_ITEMS = [
     "Change Password [Token + Password]",
     "Change Profile Picture [Token + Password]",
     "Send message to the channel [Token]",
+    "Token Checker [Token]",
+    "Leave Guild [Token]",
+    "Show all servers account is in [Token]"
 ]
 
 CAPTCHA_BOTS = [

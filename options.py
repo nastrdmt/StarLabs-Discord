@@ -1,3 +1,4 @@
+import random
 from concurrent.futures import ThreadPoolExecutor
 from random import randint
 from loguru import logger
@@ -11,7 +12,8 @@ import extra
 
 
 def options():
-    all_tasks = extra.get_user_choice(extra.MENU_ITEMS, "main_tasks", "Choose one or a few tasks")
+    extra.show_menu(extra.MENU_ITEMS)
+    all_tasks = extra.get_user_choice(extra.MENU_ITEMS, "Choose one or a few tasks")
     tasks_data = extra.ask_for_task_data(all_tasks)
     if tasks_data is None:
         return
@@ -21,6 +23,12 @@ def options():
     config = extra.read_config()
     discord_tokens = extra.read_txt_file("discord tokens", "data/discord_tokens.txt")
     proxies = extra.read_txt_file("proxies", "data/proxies.txt")
+    if len(proxies) == 0:
+        if not extra.no_proxies():
+            return
+        else:
+            proxies = ["" for _ in range(len(discord_tokens))]
+
     indexes = [i + 1 for i in range(len(discord_tokens))]
 
     change_data, ok = extra.get_change_data(tasks_data)
@@ -100,30 +108,54 @@ def account_flow(lock: threading.Lock, account_index: int, discord_token: str, p
             random_pause(config['pause_start'], config['pause_end'])
 
         if tasks_data['change username']:
-            ok = wrapper(discord_instance.change_self_data, config['max_tasks_retries'], "", "", change_data['passwords'][account_index - 1], change_data['new_usernames'][account_index - 1])
+            ok, _ = wrapper(discord_instance.change_self_data, config['max_tasks_retries'], "", "", change_data['passwords'][account_index - 1], change_data['new_usernames'][account_index - 1])
             if not ok:
                 report = True
             random_pause(config['pause_start'], config['pause_end'])
 
         if tasks_data['change password']:
-            ok = wrapper(discord_instance.change_self_data, config['max_tasks_retries'], "", change_data['new_passwords'][account_index - 1], change_data['passwords'][account_index - 1], "")
+            ok, new_token = wrapper(discord_instance.change_self_data, config['max_tasks_retries'], "", change_data['new_passwords'][account_index - 1], change_data['passwords'][account_index - 1], "")
             if not ok:
                 report = True
+
+            extra.update_new_token(discord_token, new_token, lock)
+
             random_pause(config['pause_start'], config['pause_end'])
 
         if tasks_data['change profile picture']:
-            ok = wrapper(discord_instance.change_self_data, config['max_tasks_retries'], change_data['profile_pictures'][account_index - 1], "", "", "")
+            ok, _ = wrapper(discord_instance.change_self_data, config['max_tasks_retries'], change_data['profile_pictures'][account_index - 1], "", "", "")
             if not ok:
                 report = True
             random_pause(config['pause_start'], config['pause_end'])
 
         if tasks_data['send message channel']:
-            ok = wrapper(discord_instance.send_guild_chat_message, config['max_tasks_retries'], tasks_data['send message channel']['guild_id'], tasks_data['send message channel']['channel_id'], tasks_data['send message channel']['message_content'])
+            ok = wrapper(discord_instance.send_guild_chat_message, config['max_tasks_retries'], tasks_data['send message channel']['guild_id'], tasks_data['send message channel']['channel_id'], random.choice(change_data['messages_to_send']))
             if not ok:
                 report = True
             random_pause(config['pause_start'], config['pause_end'])
 
-            return
+        if tasks_data['token checker']:
+            ok, token_status = wrapper(discord_instance.token_checker, config['max_tasks_retries'])
+            if not ok:
+                report = True
+            else:
+                if token_status == "locked":
+                    report_locked_token(discord_token, lock)
+
+            random_pause(config['pause_start'], config['pause_end'])
+
+        if tasks_data['leave guild']:
+            ok = wrapper(discord_instance.leave_guild, config['max_tasks_retries'], tasks_data['leave guild']['guild_id'])
+            if not ok:
+                report = True
+            random_pause(config['pause_start'], config['pause_end'])
+
+        if tasks_data['show all token guilds']:
+            ok = wrapper(discord_instance.show_all_token_guilds, config['max_tasks_retries'])
+            if not ok:
+                report = True
+            random_pause(config['pause_start'], config['pause_end'])
+
     except Exception as err:
         logger.error(f"{account_index} | Account flow failed: {err}")
 
@@ -133,9 +165,16 @@ def account_flow(lock: threading.Lock, account_index: int, discord_token: str, p
 
 def wrapper(function, attempts: int, *args, **kwargs):
     for _ in range(attempts):
-        if function(*args, **kwargs):
-            return True
-    return False
+        result = function(*args, **kwargs)
+
+        if isinstance(result, tuple) and result and isinstance(result[0], bool):
+            if result[0]:
+                return result
+        elif isinstance(result, bool):
+            if result:
+                return True
+
+    return result
 
 
 def report_failed_token(discord_token: str, lock: threading.Lock, failed_queue: queue.Queue):
@@ -148,6 +187,17 @@ def report_failed_token(discord_token: str, lock: threading.Lock, failed_queue: 
 
     except Exception as err:
         logger.error(f"{discord_token} | Error while reporting failed token: {err}")
+
+
+def report_locked_token(discord_token: str, lock: threading.Lock):
+    try:
+        with lock:
+            with open("data/locked_tokens.txt", "a") as file:
+                file.write(discord_token + "\n")
+                return
+
+    except Exception as err:
+        logger.error(f"{discord_token} | Error while reporting locked token: {err}")
 
 
 def random_pause(start: int, end: int):

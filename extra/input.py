@@ -1,18 +1,11 @@
 from loguru import logger
-import inquirer
 
 import extra
 
 
-def get_user_choice(tasks_list: list, task_id: str, message_to_show: str) -> list:
-    questions = [
-        inquirer.Checkbox(task_id,
-                          message=message_to_show,
-                          choices=tasks_list,
-                          ),
-    ]
-
-    return inquirer.prompt(questions)[task_id]
+def get_user_choice(tasks_list: list, text_to_show: str) -> list:
+    user_choice = input(text_to_show + ": ").split()
+    return [tasks_list[int(task.strip())-1] for task in user_choice]
 
 
 def ask_for_task_data(all_tasks: list) -> dict | None:
@@ -24,7 +17,10 @@ def ask_for_task_data(all_tasks: list) -> dict | None:
         "change username": False,
         "change password": False,
         "change profile picture": False,
-        "send message channel": {}
+        "send message channel": {},
+        "token checker": False,
+        "leave guild": {},
+        "show all token guilds": False
     }
 
     if "Inviter [Token]" in all_tasks:
@@ -35,7 +31,10 @@ def ask_for_task_data(all_tasks: list) -> dict | None:
             invite_code = invite_link
 
         tasks_user_data['inviter']['invite_code'] = invite_code
-        captcha_choice = get_user_choice(extra.CAPTCHA_BOTS, "captcha_bot", "Select from the list the type of captcha the server has")
+
+        extra.show_menu(extra.CAPTCHA_BOTS)
+        captcha_choice = get_user_choice(extra.CAPTCHA_BOTS,  "Select from the list the type of captcha the server has")
+
         if len(captcha_choice) > 1:
             logger.error("Choose only one type of captcha")
             return
@@ -83,6 +82,22 @@ def ask_for_task_data(all_tasks: list) -> dict | None:
         message_link = input("Paste the link to the channel: ").strip()
         tasks_user_data['send message channel']['guild_id'] = message_link.split("/")[-2]
         tasks_user_data['send message channel']['channel_id'] = message_link.split("/")[-1]
-        tasks_user_data['send message channel']['message_content'] = input("Paste the message you want to send: ").strip()
+
+    if "Token Checker [Token]" in all_tasks:
+        tasks_user_data['token checker'] = True
+
+    if "Leave Guild [Token]" in all_tasks:
+        tasks_user_data['leave guild']['guild_id'] = input("Paste the ID of the server you want to leave: ").strip()
+
+    if "Show all servers account is in [Token]" in all_tasks:
+        tasks_user_data['show all token guilds'] = True
 
     return tasks_user_data
+
+
+def no_proxies() -> bool:
+    user_choice = int(input("No proxies were detected. Do you want to continue without proxies? (1 or 2)\n"
+                            "[1] Yes\n"
+                            "[2] No\n>> ").strip())
+
+    return True if user_choice == 1 else False

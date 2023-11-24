@@ -16,23 +16,38 @@ class Capmonstercloud:
     # returns gRecaptchaResponse, resp_key and success status (False if something failed)
     def solve_hcaptcha(self, site_key: str, website_url: str, captcha_rqdata: str, user_agent: str) -> tuple[str, bool]:
         try:
-            captcha_data = {
-                "clientKey": self.api_key,
-                "task":
-                    {
-                        "type": "HCaptchaTask",
-                        "websiteURL": website_url,
-                        "websiteKey": site_key,
-                        "data": captcha_rqdata,
-                        "userAgent": user_agent,
-                        "fallbackToActualUA": True,
-                        "proxyType": "http",
-                        "proxyAddress": self.proxy.split("@")[1].split(":")[0],
-                        "proxyPort": self.proxy.split("@")[1].split(":")[1],
-                        "proxyLogin": self.proxy.split("@")[0].split(":")[0],
-                        "proxyPassword": self.proxy.split("@")[0].split(":")[1]
-                    }
-            }
+            if self.client.proxies:
+                captcha_data = {
+                    "clientKey": self.api_key,
+                    "task":
+                        {
+                            "type": "HCaptchaTask",
+                            "websiteURL": website_url,
+                            "websiteKey": site_key,
+                            "data": captcha_rqdata,
+                            "userAgent": user_agent,
+                            "fallbackToActualUA": True,
+                            "proxyType": "http",
+                            "proxyAddress": self.proxy.split("@")[1].split(":")[0],
+                            "proxyPort": self.proxy.split("@")[1].split(":")[1],
+                            "proxyLogin": self.proxy.split("@")[0].split(":")[0],
+                            "proxyPassword": self.proxy.split("@")[0].split(":")[1]
+                        }
+                }
+
+            else:
+                captcha_data = {
+                    "clientKey": self.api_key,
+                    "task":
+                        {
+                            "type": "HCaptchaTaskProxyless",
+                            "websiteURL": website_url,
+                            "websiteKey": site_key,
+                            "data": captcha_rqdata,
+                            "userAgent": user_agent,
+                            "fallbackToActualUA": True,
+                        }
+                }
 
             resp = self.client.post("https://api.capmonster.cloud/createTask",
                                     json=captcha_data)

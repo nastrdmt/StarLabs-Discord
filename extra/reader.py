@@ -30,6 +30,10 @@ def get_change_data(tasks: dict) -> tuple[dict, bool]:
             with open("data/new_passwords.txt", "r") as file:
                 change_data['new_passwords'] = [line.strip() for line in file]
 
+        if tasks['send message channel']:
+            with open("data/messages_to_send.txt", "r") as file:
+                change_data['messages_to_send'] = [line.strip() for line in file]
+
         if tasks['change profile picture']:
             encoded_images = []
 

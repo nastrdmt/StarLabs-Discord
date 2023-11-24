@@ -1,3 +1,5 @@
+from typing import Tuple
+
 from curl_cffi import requests
 from functools import partial
 from loguru import logger
@@ -25,11 +27,13 @@ class DiscordTower:
         self.location_channel_id: str = ""
         self.location_guild_id: str = ""
 
+        self.websocket_conn_successful = False
         self.profile_picture = None
         self.new_password = None
         self.old_password = None
         self.new_username = None
         self.change_status: str = "undone"
+        self.changed_token: str = ""
 
         self.user_agent: str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36"
         self.captcha_sitekey: str = "a9b5fb07-92ff-493f-86fe-352a2803b3df"
@@ -93,9 +97,21 @@ class DiscordTower:
                 logger.success(f'{self.account_index} | Message sent!')
                 return True
 
-            elif resp.status_code == 429 or "rate limit":
-                logger.error(f"{self.account_index} | This channel has a slow mode.")
+            elif "This content is blocked by this server" in resp.text:
+                logger.error(f"{self.account_index} | This content is blocked by this server")
                 return False
+
+            elif resp.json()['code'] == 200000:
+                logger.error(f"{self.account_index} | {resp.json()['message']}")
+                return False
+
+            elif resp.status_code == 429 or "rate limit" in resp.text:
+                try:
+                    logger.error(f"{self.account_index} | {resp.json()['message']}")
+                    return False
+                except:
+                    logger.error(f"{self.account_index} | {resp.text}")
+                    return False
 
             elif "Unknown Channel" in resp.text:
                 logger.error(f"{self.account_index} | Most likely the account is not on the server.")
@@ -189,8 +205,19 @@ class DiscordTower:
                                          'new_password': self.new_password,
                                      })
 
-            if resp.status_code == 200:
+            if "Password is too weak or common to use." in resp.text:
+                logger.error(f"{self.account_index} | Password is too weak or common to use.")
+                self.change_status = "failed"
+                self.end_websockets()
+
+            elif "Password does not match." in resp.text:
+                logger.error(f"{self.account_index} | Password does not match. You provided wrong password.")
+                self.change_status = "failed"
+                self.end_websockets()
+
+            elif resp.status_code == 200 and "token" in resp.text:
                 logger.success(f"{self.account_index} | Successfully changed the password.")
+                self.changed_token = resp.json()['token']
                 self.change_status = "done"
                 self.end_websockets()
             else:
@@ -322,17 +349,14 @@ class DiscordTower:
     # profile picture should be in encoded string format like
     # with open(file_path, 'rb') as image_file:
     #     profile_picture_encoded = base64.b64encode(image_file.read()).decode('utf-8')
-    def change_self_data(self, profile_picture_encoded: str = None, new_password: str = None, password: str = None, new_username: str = None):
+    def change_self_data(self, profile_picture_encoded: str = None, new_password: str = None, password: str = None, new_username: str = None) -> tuple[bool, str]:
         self.profile_picture = profile_picture_encoded
         self.new_password = new_password
         self.old_password = password
         self.new_username = new_username
 
         self.start_websockets()
-        if self.change_status == "done":
-            return True
-        else:
-            return False
+        return self.change_status == "done", self.changed_token
 
     def change_profile_picture(self):
         try:
@@ -422,6 +446,114 @@ class DiscordTower:
             logger.error(f"{self.account_index} | Failed to bypass Sledgehammer bot: {err}")
             return False
 
+    def token_checker(self) -> tuple[bool, str] | bool:
+        try:
+            guilds_url = "https://discord.com/api/v9/users/@me/affinities/guilds"
+            me_url = "https://discord.com/api/v9/users/@me"
+
+            resp = self.client.get(guilds_url)
+
+            if resp.status_code in (401, 403):
+                logger.warning(f"{self.account_index} | Token is locked: {self.discord_token}")
+                return True, "locked"
+
+            if resp.status_code in (200, 204):
+                response = self.client.get(me_url)
+                flags_data = response.json()['flags'] - response.json()['public_flags']
+
+                if flags_data == 17592186044416:
+                    logger.warning(f"{self.account_index} | Token is quarantined: {self.discord_token}")
+                elif flags_data == 1048576:
+                    logger.warning(f"{self.account_index} | Token is flagged as spammer: {self.discord_token}")
+                elif flags_data == 17592186044416 + 1048576:
+                    logger.warning(f"{self.account_index} | Token is flagged as spammer and quarantined: {self.discord_token}")
+
+                logger.success(f"{self.account_index} | Token is working!")
+
+            else:
+                logger.error(f"Invalid status code {resp.status_code} while checking token.")
+
+            return True, ""
+        except Exception as err:
+            logger.error(f"{self.account_index} | Failed to check token status: {err}")
+            return False, ""
+
+    def leave_guild(self, guild_id: str) -> bool:
+        try:
+            leave_guild_url = f"https://discord.com/api/v9/users/@me/guilds/{guild_id}"
+            headers = {
+                'authority': 'discord.com',
+                'accept': '*/*',
+                'content-type': 'application/json',
+                'origin': 'https://discord.com',
+                'sec-ch-ua-mobile': '?0',
+                'sec-ch-ua-platform': '"Windows"',
+                'sec-fetch-dest': 'empty',
+                'sec-fetch-mode': 'cors',
+                'sec-fetch-site': 'same-origin',
+                'x-debug-options': 'bugReporterEnabled',
+                'x-discord-locale': 'en-US',
+            }
+
+            json_data = {
+                'lurking': False,
+            }
+
+            resp = self.client.delete(leave_guild_url, headers=headers, json=json_data)
+
+            if resp.status_code == 204:
+                logger.success(f"{self.account_index} | Successfully leaved the guild!")
+                return True
+
+        except Exception as err:
+            logger.error(f"{self.account_index} | Failed to leave the guild: {err}")
+            return False
+
+    def show_all_token_guilds(self) -> bool:
+        try:
+            all_guilds_headers = {
+                'authority': 'discord.com',
+                'accept': '*/*',
+                'accept-language': 'ru,en-US;q=0.9,en;q=0.8,ru-RU;q=0.7,zh-TW;q=0.6,zh;q=0.5,uk;q=0.4',
+                'referer': 'https://discord.com/channels/@me',
+                'sec-ch-ua-mobile': '?0',
+                'sec-ch-ua-platform': '"Windows"',
+                'sec-fetch-dest': 'empty',
+                'sec-fetch-mode': 'cors',
+                'sec-fetch-site': 'same-origin',
+                'x-debug-options': 'bugReporterEnabled',
+                'x-discord-locale': 'en-US',
+            }
+
+            token_id = self.client.get("https://discord.com/api/v9/users/@me").json()['id']
+            all_guilds_url = f"https://discord.com/api/v9/users/{token_id}/profile"
+
+            token_guilds = self.client.get(all_guilds_url,
+                                           params={
+                                               'with_mutual_guilds': 'true',
+                                               'with_mutual_friends_count': 'false',
+                                           },
+                                           headers=all_guilds_headers).json()['mutual_guilds']
+
+            all_guilds_message = ""
+
+            for guild in token_guilds:
+                for x in range(3):
+                    try:
+                        guild_name = self.client.get(f"https://discord.com/api/v9/guilds/{guild['id']}").json()['name']
+                        all_guilds_message += f"{guild_name} | "
+                        break
+                    except Exception as err:
+                        if x == 2:
+                            raise Exception(f"unable to get guild name: {err}")
+
+            logger.success(f"{self.account_index} | {self.discord_token} | Guilds: {all_guilds_message}")
+            return True
+
+        except Exception as err:
+            logger.error(f"{self.account_index} | Failed to get token's guilds: {err}")
+            return False
+
     # def bypass_wick_bot(self, guild_id: str, channel_id: str, message_id: str) -> bool:
     #     try:
     #         wick_bot_instance = utilities.wick_bot_bypass.WickBot(self.account_index, self.client, self.user_agent, self.proxy, self.discord_token, self.config, self.capmonstercloud, guild_id, channel_id, message_id, self.two_captcha_client)
@@ -432,19 +564,27 @@ class DiscordTower:
     #         return False
 
     def start_websockets(self):
-        proxy_str = f"http://{self.proxy}"
+        if self.proxy != "":
+            proxy_str = f"http://{self.proxy}"
+            self.discum_client = discum.Client(token=self.discord_token, proxy=proxy_str, log={"console": False, "file": False})
+        else:
+            self.discum_client = discum.Client(token=self.discord_token, log={"console": False, "file": False})
 
-        self.discum_client = discum.Client(token=self.discord_token, proxy=proxy_str, log={"console": False, "file": False})
         prepare = partial(self.listen_events)
 
         self.discum_client.gateway.command(prepare)
         self.discum_client.gateway.run(False)
 
+        if not self.websocket_conn_successful:
+            logger.error(f"{self.account_index} | Failed to establish a websocket connection. Check if the token is working properly.")
+
     def end_websockets(self):
         self.discum_client.gateway.close()
 
     def listen_events(self, response):
-        if response.event.ready:
+        if response.event.ready_supplemental:
+            self.websocket_conn_successful = True
+
             if self.profile_picture:
                 self.change_profile_picture()
 

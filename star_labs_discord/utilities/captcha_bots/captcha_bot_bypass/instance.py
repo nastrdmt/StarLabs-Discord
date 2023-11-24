@@ -70,9 +70,12 @@ class CaptchaBot:
                 self.end_websockets()
 
     def start_websockets(self):
-        proxy_str = f"http://{self.proxy}"
+        if self.proxy:
+            proxy_str = f"http://{self.proxy}"
+            self.discum_client = discum.Client(token=self.discord_token, proxy=proxy_str, log={"console": False, "file": False})
+        else:
+            self.discum_client = discum.Client(token=self.discord_token, log={"console": False, "file": False})
 
-        self.discum_client = discum.Client(token=self.discord_token, proxy=proxy_str, log={"console": False, "file": False})
         prepare = partial(self.listen_events)
 
         self.discum_client.gateway.command(prepare)
