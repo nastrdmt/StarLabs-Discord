@@ -86,7 +86,7 @@ class DiscordTower:
                                     },
                                     json={
                                         'mobile_network_type': 'unknown',
-                                        'content': message_content,
+                                        'content': message_content.replace("\\n", "\n"),
                                         'nonce': utilities.calculate_nonce(),
                                         'tts': False,
                                         'flags': 0,
