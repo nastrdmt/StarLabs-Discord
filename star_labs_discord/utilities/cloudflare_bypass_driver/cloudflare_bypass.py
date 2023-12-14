@@ -1,3 +1,5 @@
+import os
+
 from curl_cffi import requests
 from datetime import datetime
 import subprocess
@@ -309,9 +311,9 @@ class CloudflareBypasser:
 
     def _get_encrpyted_wb(self, data: dict):
         str_data = json.dumps(data, separators=(',', ':'))
-        result = subprocess.run(['node', '/cloudflare_bypass_driver/wb_encrypter.js', str_data, self.key], capture_output=True, text=True)
+        path = os.path.dirname(os.path.abspath(__file__))
+        result = subprocess.run(['node', f'{path}/wb_encrypter.js', str_data, self.key], capture_output=True, text=True)
         wb = result.stdout.strip()
-
         return wb
 
     def _generate_cf_random_url(self):

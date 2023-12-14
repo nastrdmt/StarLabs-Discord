@@ -8,7 +8,7 @@ def get_user_choice(tasks_list: list, text_to_show: str) -> list:
     return [tasks_list[int(task.strip())-1] for task in user_choice]
 
 
-def ask_for_task_data(all_tasks: list) -> dict | None:
+def ask_for_task_data(all_tasks: list, config: dict) -> dict | None:
     tasks_user_data = {
         "inviter": {},
         "press button": {},
@@ -46,7 +46,7 @@ def ask_for_task_data(all_tasks: list) -> dict | None:
             tasks_user_data['inviter']['message_id'] = message_link.split("/")[-1]
 
     if "Press Button [Token]" in all_tasks:
-        visible_discord_token = input("Paste the discord token that can see the message: ").strip()
+        visible_discord_token = config['main_discord_token']
         message_link = input("Paste the link to the message: ").strip()
         tasks_user_data['press button']['guild_id'] = message_link.split("/")[-3]
         tasks_user_data['press button']['channel_id'] = message_link.split("/")[-2]
@@ -57,7 +57,7 @@ def ask_for_task_data(all_tasks: list) -> dict | None:
         tasks_user_data['press button']['application_id'] = application_id
 
     if "Press Reaction [Token]" in all_tasks:
-        visible_discord_token = input("Paste the discord token that can see the message: ").strip()
+        visible_discord_token = config['main_discord_token']
         message_link = input("Paste the link to the message: ").strip()
         tasks_user_data['press reaction']['channel_id'] = message_link.split("/")[-2]
         tasks_user_data['press reaction']['message_id'] = message_link.split("/")[-1]

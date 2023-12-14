@@ -2,6 +2,7 @@ from loguru import logger
 
 from . import DiscordTower
 from . import utilities
+from .utilities import create_x_super_properties_invite, create_x_super_properties
 
 
 class Inviter(DiscordTower):
@@ -18,7 +19,7 @@ class Inviter(DiscordTower):
                     return False
 
             self.x_content_properties = utilities.create_x_context_properties(self.location_guild_id, self.location_channel_id)
-            self.client.headers.update({"x_content_properties": self.x_content_properties})
+            self.client.headers.update({"X-Context-Properties": self.x_content_properties})
 
         except Exception as err:
             logger.error(f'{self.account_index} | Failed to invite: {err}')
@@ -32,6 +33,8 @@ class Inviter(DiscordTower):
     def solve_invite_captcha(self):
         for retry in range(self.config['max_invite_retries']):
             try:
+                x_super = create_x_super_properties(self.user_agent)
+
                 resp = self.client.post(f"https://discord.com/api/v9/invites/{self.invite_code}",
                                         json={'session_id': None},
                                         headers={
@@ -50,6 +53,7 @@ class Inviter(DiscordTower):
                                             'user-agent': self.user_agent,
                                             'x-context-properties': self.x_content_properties,
                                             'x-debug-options': 'bugReporterEnabled',
+                                            'x-super-properties': x_super,
                                             'x-discord-locale': 'en-US',
                                             'x-discord-timezone': 'America/New_York',
                                         })
@@ -58,8 +62,8 @@ class Inviter(DiscordTower):
                     self.captcha_rqdata = resp.json()["captcha_rqdata"]
                     self.captcha_rqtoken = resp.json()["captcha_rqtoken"]
 
-                    g_recaptcha_response, ok = self.capmonstercloud.solve_hcaptcha(self.captcha_sitekey, f"https://discord.com/invite/{self.invite_code}", self.captcha_rqdata, self.user_agent)
-                    if not ok:
+                    g_recaptcha_response = self._solve_hcaptcha(self.captcha_sitekey, f"https://discord.com/app", self.captcha_rqdata, self.user_agent)
+                    if g_recaptcha_response == "":
                         continue
 
                     resp = self.client.post(f"https://discord.com/api/v9/invites/{self.invite_code}",
@@ -81,15 +85,18 @@ class Inviter(DiscordTower):
                                                 'x-captcha-key': g_recaptcha_response,
                                                 'x-captcha-rqtoken': self.captcha_rqtoken,
                                                 'x-context-properties': self.x_content_properties,
-                                                'x-debug-options': 'bugReporterEnabled',
-                                                'x-discord-locale': 'en-US',
-                                                'x-discord-timezone': 'America/New_York',
+                                                'x-super-properties': x_super
                                             }
                                             )
 
                     if resp.status_code == 200 and resp.json()["type"] == 0:
                         logger.success(f"{self.account_index} | Joined the server!")
                         return True
+
+                    elif "Unknown Message" in resp.text:
+                        logger.info(f"{self.account_index} | Unknown Message | {retry + 1}/{self.config['max_invite_retries']}")
+                        continue
+
                     else:
                         logger.info(f"{self.account_index} | Wrong invite response | {retry + 1}/{self.config['max_invite_retries']}")
                         continue

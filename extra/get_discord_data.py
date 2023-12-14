@@ -1,4 +1,4 @@
-from urllib.parse import quote
+
 from loguru import logger
 import requests
 
@@ -10,6 +10,9 @@ def message_click_button_info(channel_id: str, message_id: str, visible_discord_
     try:
         resp = requests.get("https://discord.com/api/v9/channels/" + channel_id + "/messages?limit=1&around=" + message_id,
                             headers={"Authorization": visible_discord_token})
+
+        if '"custom_id":"enter-giveaway"' in resp.text:
+            return resp.json()[0]['components'][0]['components'][0], resp.json()[0]['author']['id'], True
 
         result, ok = choose_button_to_click(resp.json()[0]['components'])
 
@@ -32,6 +35,7 @@ def choose_button_to_click(components: list) -> tuple[dict, bool]:
             elif isinstance(element, list):
                 for item in element:
                     parsed_components.extend(collect_components(item))
+
             return parsed_components
 
         all_components = collect_components(components)
@@ -60,13 +64,27 @@ def message_reactions_emojis_info(channel_id: str, message_id: str, visible_disc
                             })
 
         emojis = resp.json()[0]['reactions']
-        emojis_list = [f"{emoji['emoji']['name']} | Count: {emoji['count']}" for emoji in emojis]
+        emoji_data = {}
+        emoji_list_to_show = []
 
-        extra.show_menu(emojis_list)
-        emojis = extra.get_user_choice(emojis_list, "Choose the emoji")
-        emojis_names = [quote(emoji.split(" |")[0]) for emoji in emojis]
+        for emoji in emojis:
+            emoji_data[emoji['emoji']['name']] = {
+                "name": emoji['emoji']['name'],
+                "count": emoji['count'],
+                "id": emoji['emoji']['id']
+            }
+            emoji_list_to_show.append(f"{emoji['emoji']['name']} | Count: {emoji['count']}")
 
-        return emojis_names, True
+        extra.show_menu(emoji_list_to_show)
+        emojis = extra.get_user_choice(emoji_list_to_show, "Choose the emoji")
+
+        user_choice_emoji = [emoji.split(" |")[0] for emoji in emojis]
+
+        emoji_to_return = []
+        for user_emoji in user_choice_emoji:
+            emoji_to_return.append(emoji_data[user_emoji])
+
+        return emoji_to_return, True
 
     except Exception as err:
         logger.error(f'Failed to get emojis info: {err}')

@@ -1,10 +1,10 @@
-from typing import Tuple
-
+from urllib.parse import quote
 from curl_cffi import requests
 from functools import partial
 from loguru import logger
 from time import sleep
 import discum
+import random
 
 from . import utilities
 
@@ -16,9 +16,13 @@ class DiscordTower:
         self.config = config
         self.proxy = proxy
 
-        self.discum_client: discum.Client | None = None
         self.capmonstercloud: None | utilities.Capmonstercloud = None
         self.two_captcha_client: None | utilities.TwoCaptcha = None
+        self.hcoptcha_client: None | utilities.HCoptcha = None
+        self.capsolver_client: None | utilities.Capsolver = None
+        self.anti_captcha_client: None | utilities.AntiCaptcha = None
+
+        self.discum_client: discum.Client | None = None
         self.client: requests.Session | None = None
         self.captcha_rqtoken: str = ""
         self.captcha_rqdata: str = ""
@@ -59,6 +63,9 @@ class DiscordTower:
 
                 self.capmonstercloud = utilities.Capmonstercloud(self.account_index, self.config["capmonster_api_key"], self.client, self.proxy)
                 self.two_captcha_client = utilities.TwoCaptcha(self.account_index, self.config['2captcha_api_key'], self.client, self.proxy)
+                self.hcoptcha_client = utilities.HCoptcha(self.account_index, self.config['hcoptcha_api_key'], self.client, self.proxy)
+                self.capsolver_client = utilities.Capsolver(self.account_index, self.config['capsolver_api_key'], self.client, self.proxy)
+                self.anti_captcha_client = utilities.AntiCaptcha(self.account_index, self.config['anticaptcha_api_key'], self.client, self.proxy)
 
                 return True
 
@@ -125,9 +132,14 @@ class DiscordTower:
             logger.error(f"{self.account_index} | Failed to send guild chat message: {err}")
             return False
 
-    def send_reaction_on_message(self, channel_id: str, message_id: str, emoji: str) -> bool:
+    def send_reaction_on_message(self, channel_id: str, message_id: str, emoji: dict) -> bool:
         try:
-            resp = self.client.put(f"https://discord.com/api/v9/channels/{channel_id}/messages/{message_id}/reactions/{emoji}/%40me")
+            if emoji['id'] is not None:
+                emoji_name = emoji['name']
+                resp = self.client.put(f"https://discord.com/api/v9/channels/{channel_id}/messages/{message_id}/reactions/{emoji_name}%3A{emoji['id']}/%40me")
+            else:
+                emoji_name = quote(emoji['name'])
+                resp = self.client.put(f"https://discord.com/api/v9/channels/{channel_id}/messages/{message_id}/reactions/{emoji_name}/%40me")
 
             if resp.status_code == 204:
                 logger.success(f"{self.account_index} | Successfully reacted to the message!")
@@ -289,8 +301,8 @@ class DiscordTower:
                 self.captcha_rqdata = resp.json()["captcha_rqdata"]
                 self.captcha_rqtoken = resp.json()["captcha_rqtoken"]
 
-                g_recaptcha_response, ok = self.capmonstercloud.solve_hcaptcha(self.captcha_sitekey, f"https://discord.com/app", self.captcha_rqdata, self.user_agent)
-                if not ok:
+                g_recaptcha_response = self._solve_hcaptcha(self.captcha_sitekey, f"https://discord.com/app", self.captcha_rqdata, self.user_agent)
+                if g_recaptcha_response == "":
                     self.change_status = "failed"
                     self.end_websockets()
 
@@ -602,3 +614,64 @@ class DiscordTower:
             if self.change_status == "undone":
                 logger.error(f"{self.account_index} | Unable to change self data. Too much time has passed.")
             self.end_websockets()
+
+    def _solve_hcaptcha(self, site_key: str, url: str, rq_data: str = "", user_agent: str = "") -> str:
+        try:
+            g_recaptcha_response = ""
+
+            match self.config['captcha_service_to_use']:
+                case "capmonster":
+                    g_recaptcha_response, _ = self.capmonstercloud.solve_hcaptcha(site_key, url, rq_data, user_agent)
+                case "2captcha":
+                    g_recaptcha_response, _ = self.two_captcha_client.solve_hcaptcha(site_key, url, rq_data, user_agent)
+
+                case "hcoptcha":
+                    g_recaptcha_response, _ = self.hcoptcha_client.solve_hcaptcha(url, rq_data)
+
+                case "capsolver":
+                    g_recaptcha_response, _ = self.capsolver_client.solve_hcaptcha(url, rq_data, site_key, user_agent)
+
+                case "anticaptcha":
+                    g_recaptcha_response, _ = self.anti_captcha_client.solve_hcaptcha(url, rq_data, site_key, user_agent)
+
+            return g_recaptcha_response
+
+        except Exception as err:
+            logger.error(f"{self.account_index} | Failed to solve HCaptcha: {err}")
+            return ""
+
+    def wrapper_send_guild_chat_message(self, guild_id: str, channel_id: str, message_content: list):
+        def send_message(message_str: str):
+            for x in range(3):
+                if not self.send_guild_chat_message(guild_id, channel_id, message_str):
+                    if x == 2:
+                        return False
+                    else:
+                        return True
+
+                else:
+                    return True
+
+        if self.config['messages_endless_loop'] == "yes":
+            if self.config['messages_random_message'] == "yes":
+                while True:
+                    if not send_message(random.choice(message_content)):
+                        return False
+                    sleep(random.randint(self.config['pause_between_message_start'], self.config['pause_between_message_end']))
+
+            else:
+                for message in message_content:
+                    if not send_message(message):
+                        return False
+                    sleep(random.randint(self.config['pause_between_message_start'], self.config['pause_between_message_end']))
+
+        else:
+            if self.config['messages_random_message'] == "yes":
+                if not send_message(random.choice(message_content)):
+                    return False
+                return True
+
+            else:
+                if not send_message(message_content[0]):
+                    return False
+                return True

@@ -1,9 +1,11 @@
 import random
+import time
 from concurrent.futures import ThreadPoolExecutor
 from random import randint
 from loguru import logger
 from time import sleep
 import threading
+import requests
 import queue
 import os
 
@@ -12,40 +14,57 @@ import extra
 
 
 def options():
+    def launch_wrapper(index, discord_token, proxy):
+        account_flow(lock, index, discord_token, proxy, config, change_data, tasks_data, failed_queue)
+
     extra.show_menu(extra.MENU_ITEMS)
+    config = extra.read_config()
     all_tasks = extra.get_user_choice(extra.MENU_ITEMS, "Choose one or a few tasks")
-    tasks_data = extra.ask_for_task_data(all_tasks)
+    tasks_data = extra.ask_for_task_data(all_tasks, config)
     if tasks_data is None:
         return
 
     os.system("cls")
     threads = int(input("How many threads do you want: ").strip())
-    config = extra.read_config()
     discord_tokens = extra.read_txt_file("discord tokens", "data/discord_tokens.txt")
     proxies = extra.read_txt_file("proxies", "data/proxies.txt")
+    indexes = [i + 1 for i in range(len(discord_tokens))]
+    mobile_proxy_queue = queue.Queue()
+    failed_queue = queue.Queue()
+    lock = threading.Lock()
+    failed_count = 0
+
+    change_data, ok = extra.get_change_data(tasks_data)
+    if not ok:
+        return
+
     if len(proxies) == 0:
         if not extra.no_proxies():
             return
         else:
             proxies = ["" for _ in range(len(discord_tokens))]
 
-    indexes = [i + 1 for i in range(len(discord_tokens))]
+    if config['mobile_proxy'].lower() == "yes":
+        ip_change_links = extra.read_txt_file("ip change links", "data/ip_change_links.txt")
 
-    change_data, ok = extra.get_change_data(tasks_data)
-    if not ok:
-        return
+        for i in range(len(discord_tokens)):
+            mobile_proxy_queue.put(i)
+        cycle = []
+        for i in range(len(proxies)):
+            data_list = (proxies[i], ip_change_links[i], mobile_proxy_queue, config, lock, discord_tokens, change_data, tasks_data, failed_queue)
+            cycle.append(data_list)
 
-    lock = threading.Lock()
-    failed_queue = queue.Queue()
+        with ThreadPoolExecutor() as executor:
+            executor.map(mobile_proxy_wrapper, cycle)
 
-    def launch_wrapper(index, discord_token, proxy):
-        account_flow(lock, index, discord_token, proxy, config, change_data, tasks_data, failed_queue)
+    else:
+        if len(proxies) < len(discord_tokens):
+            proxies = [proxies[i % len(proxies)] for i in range(len(discord_tokens))]
 
-    logger.info("Starting...")
-    with ThreadPoolExecutor(max_workers=threads) as executor:
-        executor.map(launch_wrapper, indexes, discord_tokens, proxies)
+        logger.info("Starting...")
+        with ThreadPoolExecutor(max_workers=threads) as executor:
+            executor.map(launch_wrapper, indexes, discord_tokens, proxies)
 
-    failed_count = 0
     while not failed_queue.empty():
         failed_count += failed_queue.get()
 
@@ -102,7 +121,7 @@ def account_flow(lock: threading.Lock, account_index: int, discord_token: str, p
                 random_pause(config['pause_start'], config['pause_end'])
 
         if tasks_data['change name']:
-            ok = wrapper(discord_instance.change_name, config['max_tasks_retries'], change_data['new_names'][account_index-1])
+            ok = wrapper(discord_instance.change_name, config['max_tasks_retries'], change_data['new_names'][account_index - 1])
             if not ok:
                 report = True
             random_pause(config['pause_start'], config['pause_end'])
@@ -129,7 +148,7 @@ def account_flow(lock: threading.Lock, account_index: int, discord_token: str, p
             random_pause(config['pause_start'], config['pause_end'])
 
         if tasks_data['send message channel']:
-            ok = wrapper(discord_instance.send_guild_chat_message, config['max_tasks_retries'], tasks_data['send message channel']['guild_id'], tasks_data['send message channel']['channel_id'], random.choice(change_data['messages_to_send']))
+            ok = wrapper(discord_instance.wrapper_send_guild_chat_message, config['max_tasks_retries'], tasks_data['send message channel']['guild_id'], tasks_data['send message channel']['channel_id'], change_data['messages_to_send'])
             if not ok:
                 report = True
             random_pause(config['pause_start'], config['pause_end'])
@@ -158,6 +177,8 @@ def account_flow(lock: threading.Lock, account_index: int, discord_token: str, p
 
     except Exception as err:
         logger.error(f"{account_index} | Account flow failed: {err}")
+
+    random_pause(config['pause_accs_start'], config['pause_accs_end'])
 
     if report:
         report_failed_token(discord_token, lock, failed_queue)
@@ -202,3 +223,31 @@ def report_locked_token(discord_token: str, lock: threading.Lock):
 
 def random_pause(start: int, end: int):
     sleep(randint(start, end))
+
+
+def mobile_proxy_wrapper(data):
+    # proxies[i], ip_change_links[i], mobile_proxy_queue, config, lock, discord_tokens, change_data, tasks_data, failed_queue
+    proxy, ip_change_link, q, config, lock, discord_tokens, change_data, tasks_data, failed_queue = data[:9]
+
+    while not q.empty():
+        i = q.get()
+
+        try:
+            for _ in range(3):
+                try:
+                    requests.get(f"{ip_change_link}",
+                                 headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"},
+                                 timeout=60)
+
+                    time.sleep(config['change_ip_pause'])
+                    logger.success(f"{i + 1} | Successfully changed IP")
+                    break
+
+                except Exception as err:
+                    logger.error(f"{i + 1} | Mobile proxy error! Check your ip change link: {err}")
+                    time.sleep(2)
+
+            account_flow(lock, i + 1, discord_tokens[i], proxy, config, change_data, tasks_data, failed_queue)
+
+        except Exception as err:
+            logger.error(f"{i + 1} | Mobile proxy flow error: {err}")
