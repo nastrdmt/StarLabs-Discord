@@ -61,9 +61,18 @@ python main.py
 | max_invite_retries | Количество попыток входа на сервер |
 | max_tasks_retries | Максимальное количество попыток при выполнении задания |
 | pause_between_tasks | Пауза между каждым действием |
+| pause_between_accounts | Пауза между аккаунтами |
 | capmonster_api_key | Ключ от https://capmonster.cloud/Dashboard |
 | 2captcha_api_key | Ключ от https://2captcha.com/. |
-
+| hcoptcha_api_key | Ключ от https://hcoptcha.online/ |
+| capsolver_api_key | Ключ от https://www.capsolver.com/ |
+| anticaptcha_api_key | Ключ от https://anti-captcha.com/ |
+| captcha_service_to_use | какой сервис для прохождения капчи использовать. (capmonster, hcoptcha, capsolver, anticaptcha) |
+| mobile_proxy | Мобильные прокси |
+| change_ip_pause | Пауза после смены айпи мобильных прокси |
+| endless_loop | Отправлять сообщения в чат бесконечно |
+| random_message | Брать сообщения для отправки в чат рандомно или нет | 
+| pause_between_messages | Пауза между сообщения при отправке в чат |
 
 
 ## 🗂️ Data
@@ -80,8 +89,10 @@ python main.py
 | passwords.txt | Содержит текущие пароли аккаунтов |
 | proxies.txt | Содержит прокси в формате user:pass@ip:port |
 | profile_pictures | Папка содержит картинки для смены в профилях |
-| locked_tokens | Файл содержит токены, которые заблокированы или ограничены | 
-| messages_to_send | Файл содержит сообщения, которые будет отправлять бот в чат (случайно) |
+| locked_tokens.txt | Файл содержит токены, которые заблокированы или ограничены | 
+| messages_to_send.txt | Файл содержит сообщения, которые будет отправлять бот в чат (случайно) |
+| ip_change_links.txt | Содержит ссылки для смены айпи мобильных прокси |
+
 
 ## Дисклеймер
 Автоматизация учетных записей пользователей Discord, также известных как самостоятельные боты, является нарушением Условий обслуживания и правил сообщества Discord и приведет к закрытию вашей учетной записи (аккаунтов). Рекомендуется осмотрительность. Я не буду нести ответственность за ваши действия. Прочтите об Условиях обслуживания Discord и Правилах сообщества.
@@ -130,17 +141,26 @@ python main.py
 
 | Name | Description |
 | --- | --- |
-| max_invite_retries | Amount of retries while joining the server |
-| max_tasks_retries | Amount of retries while completing the task |
-| pause_between_tasks | Pause between the tasks |
-| capmonster_api_key | API key from https://capmonster.cloud/Dashboard |
-| 2captcha_api_key | API key from https://2captcha.com/ |
-
+| max_invite_retries | Number of attempts to log in to the server |
+| max_tasks_retries | Maximum number of attempts to complete a task |
+| pause_between_tasks | Pause between each action |
+| pause_between_accounts | Pause between accounts |
+| capmonster_api_key | Key to https://capmonster.cloud |
+| 2captcha_api_key | Key to https://2captcha.com |
+| hcoptcha_api_key | Key to https://hcoptcha.online |
+| capsolver_api_key | Key from https://www.capsolver.com |
+| anticaptcha_api_key | Key for https://anti-captcha.com |
+| captcha_service_to_use | Which service to use to pass captcha. (capmonster, hcoptcha, capsolver, anticaptcha) |
+| mobile_proxy | Mobile proxies yes/no |
+| change_ip_pause | Pause after changing the ip of mobile proxies |
+| endless_loop | Send messages to chat endlessly |
+| random_message | Take messages to send to chat randomly or not | 
+| pause_between_messages | Pause between messages to be sent to chat |
 
 
 ## 🗂️ Data
 
-Данные в папке data:
+The data is in the data folder:
 
 | Name | Description |
 | --- | --- |
@@ -152,8 +172,9 @@ python main.py
 | passwords.txt | Contains current account passwords |
 | proxies.txt | Contains a proxy in the format user:pass@ip:port |
 | profile_pictures | The folder contains pictures to change in profiles |
-| locked_tokens | File contains tokens that are locked or restricted | 
-| messages_to_send | File contains messages that the bot will send to chat (randomly) |
+| locked_tokens.txt | File contains tokens that are locked or restricted | 
+| messages_to_send.txt | File contains messages that the bot will send to chat (randomly) |
+| ip_change_links.txt | Contains links to change mobile proxy IPs |
 
 ## Disclaimer
 
