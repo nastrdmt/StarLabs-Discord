@@ -38,11 +38,12 @@ def options():
     if not ok:
         return
 
+    use_proxy = True
     if len(proxies) == 0:
         if not extra.no_proxies():
             return
         else:
-            proxies = ["" for _ in range(len(discord_tokens))]
+            use_proxy = False
 
     if config['mobile_proxy'].lower() == "yes":
         ip_change_links = extra.read_txt_file("ip change links", "data/ip_change_links.txt")
@@ -58,7 +59,9 @@ def options():
             executor.map(mobile_proxy_wrapper, cycle)
 
     else:
-        if len(proxies) < len(discord_tokens):
+        if not use_proxy:
+            proxies = ["" for _ in range(len(discord_tokens))]
+        elif len(proxies) < len(discord_tokens):
             proxies = [proxies[i % len(proxies)] for i in range(len(discord_tokens))]
 
         logger.info("Starting...")
