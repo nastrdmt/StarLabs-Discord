@@ -84,27 +84,29 @@ def account_flow(lock: threading.Lock, account_index: int, discord_token: str, p
             discord_instance = star_labs_discord.Inviter(account_index, proxy, discord_token, config, tasks_data['inviter']['invite_code'])
             if not wrapper(discord_instance.invite, config['max_tasks_retries']):
                 report = True
-            if 'captcha_bot' in tasks_data['inviter']:
-                match tasks_data['inviter']['captcha_bot']:
-                    case "Pandez":
-                        ok = wrapper(discord_instance.bypass_pandez_bot, config['max_tasks_retries'], tasks_data['inviter']['guild_id'], tasks_data['inviter']['channel_id'], tasks_data['inviter']['message_id'])
-                        if not ok:
-                            report = True
 
-                    case "CaptchaBot":
-                        ok = wrapper(discord_instance.bypass_captcha_bot, config['max_tasks_retries'], tasks_data['inviter']['guild_id'], tasks_data['inviter']['channel_id'], tasks_data['inviter']['message_id'])
-                        if not ok:
-                            report = True
+            if not report:
+                if 'captcha_bot' in tasks_data['inviter']:
+                    match tasks_data['inviter']['captcha_bot']:
+                        case "Pandez":
+                            ok = wrapper(discord_instance.bypass_pandez_bot, config['max_tasks_retries'], tasks_data['inviter']['guild_id'], tasks_data['inviter']['channel_id'], tasks_data['inviter']['message_id'])
+                            if not ok:
+                                report = True
 
-                    case "Sledgehammer":
-                        ok = wrapper(discord_instance.bypass_sledgehammer_bot, config['max_tasks_retries'], tasks_data['inviter']['guild_id'], tasks_data['inviter']['channel_id'], tasks_data['inviter']['message_id'])
-                        if not ok:
-                            report = True
+                        case "CaptchaBot":
+                            ok = wrapper(discord_instance.bypass_captcha_bot, config['max_tasks_retries'], tasks_data['inviter']['guild_id'], tasks_data['inviter']['channel_id'], tasks_data['inviter']['message_id'])
+                            if not ok:
+                                report = True
 
-                    case "Enter Form":
-                        ok = wrapper(discord_instance.bypass_enter_form, config['max_tasks_retries'], tasks_data['inviter']['invite_code'])
-                        if not ok:
-                            report = True
+                        case "Sledgehammer":
+                            ok = wrapper(discord_instance.bypass_sledgehammer_bot, config['max_tasks_retries'], tasks_data['inviter']['guild_id'], tasks_data['inviter']['channel_id'], tasks_data['inviter']['message_id'])
+                            if not ok:
+                                report = True
+
+                        case "Enter Form":
+                            ok = wrapper(discord_instance.bypass_enter_form, config['max_tasks_retries'], tasks_data['inviter']['invite_code'])
+                            if not ok:
+                                report = True
         else:
             discord_instance = star_labs_discord.DiscordTower(account_index, proxy, discord_token, config)
 
