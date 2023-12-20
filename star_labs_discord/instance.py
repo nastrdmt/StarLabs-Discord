@@ -54,12 +54,13 @@ class DiscordTower:
                 if not utilities.init_cf(self.account_index, self.client, self.user_agent):
                     raise Exception
                 # initialize cf_clearance bypasser and generate cf_clearance
-                cf = utilities.CloudflareBypasser(self.client, self.user_agent)
-                if not cf.get_cf_clearance():
-                    logger.error(f"{self.account_index} | Failed to get necessary discord info.")
-                    raise Exception
-                else:
-                    logger.success(f"{self.account_index} | Collected discord data.")
+                # cf = utilities.CloudflareBypasser(self.client, self.user_agent)
+                #
+                # if not cf.get_cf_clearance():
+                #     logger.error(f"{self.account_index} | Failed to get necessary discord info.")
+                #     raise Exception
+                # else:
+                #     logger.success(f"{self.account_index} | Collected discord data.")
 
                 self.capmonstercloud = utilities.Capmonstercloud(self.account_index, self.config["capmonster_api_key"], self.client, self.proxy)
                 self.two_captcha_client = utilities.TwoCaptcha(self.account_index, self.config['2captcha_api_key'], self.client, self.proxy)
