@@ -8,7 +8,7 @@ colorama==0.4.6
 curl-cffi==0.5.9
 discum==1.4.1
 filetype==1.2.0
-idna==3.4
+idna==3.7
 jinxed==1.2.0
 loguru==0.7.2
 Pillow==10.1.0
